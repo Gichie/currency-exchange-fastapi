@@ -3,7 +3,7 @@ from decimal import Decimal
 from sqlalchemy import ForeignKey, Numeric, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column
 
-from currency_exchange.core.db import Base
+from currency_exchange.core.db.base import Base
 
 
 class ExchangeRate(Base):
@@ -15,6 +15,5 @@ class ExchangeRate(Base):
     rate: Mapped[Decimal] = mapped_column(Numeric(precision=7, scale=6), nullable=False)
 
     __table_args__ = (
-        UniqueConstraint("base_currency_id", "target_currency_id", name="uq_base_target_currencies")
+        UniqueConstraint("base_currency_id", "target_currency_id", name="uq_base_target_currencies"),
     )
-
