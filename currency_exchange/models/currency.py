@@ -9,7 +9,5 @@ class Currency(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     code: Mapped[str] = mapped_column(String(3), unique=True, nullable=False)
-    name: Mapped[str] = mapped_column(String(30), unique=True, nullable=False)
-    sign: Mapped[str] = mapped_column(String(10), nullable=False)
-
-
+    name: Mapped[str] = mapped_column(String(40), unique=True, nullable=False)
+    sign: Mapped[str] = mapped_column(String(8), nullable=False)
