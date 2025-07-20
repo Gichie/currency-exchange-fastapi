@@ -6,10 +6,10 @@ from sqlalchemy import pool
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
-from currency_exchange.core.config import settings
-from currency_exchange.core.db.base import Base
-from currency_exchange.models.currency import Currency  # noqa
-from currency_exchange.models.exchange_rate import ExchangeRate  # noqa
+from src.core.config import settings
+from src.core.db.base import Base
+from src.models.currency import Currency  # noqa
+from src.models.exchange_rate import ExchangeRate  # noqa
 
 config = context.config
 

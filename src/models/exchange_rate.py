@@ -3,7 +3,7 @@ from decimal import Decimal
 from sqlalchemy import ForeignKey, Numeric, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column
 
-from currency_exchange.core.db.base import Base
+from src.core.db.base import Base
 
 
 class ExchangeRate(Base):
