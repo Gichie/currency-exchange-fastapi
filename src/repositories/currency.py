@@ -1,4 +1,7 @@
+from typing import Sequence
+
 from sqlalchemy import select, exists
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.models.currency import Currency
@@ -24,7 +27,7 @@ class CurrencyRepository:
         await self.session.flush([new_currency])
         return new_currency
 
-    async def get_all_currencies(self) -> list[Currency]:
+    async def get_all_currencies(self) -> Sequence[Currency]:
         """Получает список всех валют."""
         result = await self.session.execute(select(Currency))
         return result.scalars().all()

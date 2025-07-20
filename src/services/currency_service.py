@@ -1,3 +1,7 @@
+from typing import Sequence
+
+from sqlalchemy.exc import OperationalError
+
 from src.models.currency import Currency
 from src.repositories.currency import CurrencyRepository
 from src.schemas.currency import CurrencyCreate
@@ -22,7 +26,7 @@ class CurrencyService:
 
         return new_currency
 
-    async def get_all_currencies(self) -> list[Currency]:
+    async def get_all_currencies(self) -> Sequence[Currency]:
         async with self.repository.session.begin():
             all_currencies = await self.repository.get_all_currencies()
 
