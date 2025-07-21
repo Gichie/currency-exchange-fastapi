@@ -1,7 +1,8 @@
 import logging
 
 from asyncpg import PostgresError
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
+from fastapi.exceptions import RequestValidationError
 from sqlalchemy.exc import SQLAlchemyError
 from starlette import status
 from starlette.requests import Request
@@ -35,8 +36,17 @@ async def currency_not_found_handler(request: Request, exc: CurrencyNotExistErro
     )
 
 
+async def validation_error_handler(request: Request, exc: RequestValidationError):
+    log.warning(f"Ошибка валидации данных, {request.method}, {request.url.path}, {exc}")
+    return JSONResponse(
+        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+        content={"message": "Некорректный запрос"}
+    )
+
+
 def register_exception_handlers(app: FastAPI) -> None:
     """Регистрирует обработчики исключений для FastAPI приложения."""
     app.add_exception_handler(PostgresError, database_connection_exception_handler)
     app.add_exception_handler(SQLAlchemyError, database_exception_handler)
     app.add_exception_handler(CurrencyNotExistError, currency_not_found_handler)
+    app.add_exception_handler(RequestValidationError, validation_error_handler)

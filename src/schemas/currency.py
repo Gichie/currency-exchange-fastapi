@@ -2,6 +2,7 @@ from pydantic import BaseModel, Field, field_validator
 
 
 class CurrencyBase(BaseModel):
+    id: int | None = None
     code: str = Field(
         pattern="^[a-zA-Z]{3}$", description="ISO 4217 currency code.", examples=["USD", "EUR"]
     )
@@ -12,11 +13,3 @@ class CurrencyBase(BaseModel):
     @classmethod
     def code_to_uppercase(cls, value: str) -> str:
         return value.upper()
-
-
-class CurrencyCreate(CurrencyBase):
-    pass
-
-
-class CurrencyRead(CurrencyBase):
-    id: int

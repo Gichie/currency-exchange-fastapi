@@ -4,7 +4,7 @@ from typing import Sequence
 from src.exceptions.exceptions import CurrencyNotExistError
 from src.models.currency import Currency
 from src.repositories.currency import CurrencyRepository
-from src.schemas.currency import CurrencyCreate
+from src.schemas.currency import CurrencyBase
 
 log = logging.getLogger(__name__)
 
@@ -13,7 +13,7 @@ class CurrencyService:
     def __init__(self, repository: CurrencyRepository):
         self.repository = repository
 
-    async def create_currency(self, currency_data: CurrencyCreate) -> Currency:
+    async def create_currency(self, currency_data: CurrencyBase) -> Currency:
         code: str = currency_data.code
         name: str = currency_data.name
         sign: str = currency_data.sign
@@ -35,8 +35,9 @@ class CurrencyService:
         return all_currencies
 
     async def get_currency_by_code(self, code: str) -> Currency:
+        """Приводит код к верхнему регистру и получает валюту по нему."""
         currency = await self.repository.get_currency_by_code(code.upper())
         if currency:
             return currency
-        log.warning(f"Данной валюты: {code} нет в БД")
+        log.warning(f"Валюты: '{code}' нет в БД")
         raise CurrencyNotExistError

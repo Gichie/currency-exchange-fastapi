@@ -25,6 +25,6 @@ loggers:
     handlers: [default]
     propagate: false
   uvicorn.access:
-    level: WARNING
+    level: INFO
     handlers: [default]
     propagate: false
