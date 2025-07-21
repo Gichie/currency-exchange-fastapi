@@ -31,3 +31,9 @@ class CurrencyRepository:
         """Получает список всех валют."""
         result = await self.session.execute(select(Currency))
         return result.scalars().all()
+
+    async def get_currency_by_code(self, code: str):
+        """Получает одну валюту по её коду."""
+        query = select(Currency).where(Currency.code == code)
+        result = await self.session.execute(query)
+        return result.scalar_one_or_none()

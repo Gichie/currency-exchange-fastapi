@@ -1,10 +1,12 @@
+import logging
 from typing import Sequence
 
-from sqlalchemy.exc import OperationalError
-
+from src.exceptions.exceptions import CurrencyNotExistError
 from src.models.currency import Currency
 from src.repositories.currency import CurrencyRepository
 from src.schemas.currency import CurrencyCreate
+
+log = logging.getLogger(__name__)
 
 
 class CurrencyService:
@@ -31,3 +33,10 @@ class CurrencyService:
             all_currencies = await self.repository.get_all_currencies()
 
         return all_currencies
+
+    async def get_currency_by_code(self, code: str) -> Currency:
+        currency = await self.repository.get_currency_by_code(code.upper())
+        if currency:
+            return currency
+        log.warning(f"Данной валюты: {code} нет в БД")
+        raise CurrencyNotExistError

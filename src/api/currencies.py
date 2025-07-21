@@ -1,7 +1,7 @@
 import logging
 from typing import Annotated
 
-from fastapi import APIRouter, Form, Depends
+from fastapi import APIRouter, Form, Depends, Path
 
 from src.core.dependencies import get_currency_service
 from src.models.currency import Currency
@@ -21,10 +21,17 @@ async def get_currencies(service: CurrencyService = Depends(get_currency_service
     return all_currencies
 
 
-@router.get("currency/{code}", response_model=CurrencyRead)
-async def get_currency_by_code(service: CurrencyService = Depends(get_currency_service)):
-    log.info("Запрос на получение одной валюты по коду. Method: GET. Path: /currency/{code}")
+@router.get("/currency/{code}", response_model=CurrencyRead)
+async def get_currency_by_code(
+        code: Annotated[str, Path(pattern="^[a-zA-Z]{3}$")],
+        service: CurrencyService = Depends(get_currency_service)
+) -> Currency:
+    log.info(f"Запрос на получение одной валюты по коду. Method: GET. Path: /currency/{code}")
     currency = await service.get_currency_by_code(code)
+    log.info(f"Валюта успешно получена. Method: GET. Path: /currency/{code}")
+    return currency
+
+
 
 @router.post("/currencies", response_model=CurrencyRead)
 async def create_currency(
