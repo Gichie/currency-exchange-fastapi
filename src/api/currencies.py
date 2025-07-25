@@ -3,10 +3,8 @@ from typing import Annotated
 
 from fastapi import APIRouter, Form, Depends, Path
 from starlette import status
-from starlette.responses import JSONResponse
 
 from src.core.dependencies import get_currency_service
-from src.models.currency import Currency
 from src.schemas.currency import CurrencyBase
 from src.services.currency_service import CurrencyService
 
@@ -26,7 +24,7 @@ async def get_currencies(service: CurrencyService = Depends(get_currency_service
 async def get_currency_by_code(
         code: Annotated[str, Path(pattern="^[a-zA-Z]{3}$")],
         service: CurrencyService = Depends(get_currency_service)
-) -> Currency:
+):
     log.info(f"Запрос на получение одной валюты по коду. Method: GET. Path: /currency/{code}")
     currency = await service.get_currency_by_code(code)
     return currency
@@ -38,11 +36,12 @@ async def get_currency_missing_code():
     return {"message": "Код валюты не указан"}
 
 
-@router.post("/currencies", response_model=CurrencyBase)
+@router.post("/currencies", response_model=CurrencyBase, status_code=status.HTTP_201_CREATED)
 async def create_currency(
         currency: Annotated[CurrencyBase, Form()],
-        service: CurrencyService = Depends(get_currency_service),
-) -> Currency:
+        service: CurrencyService = Depends(get_currency_service)
+):
+    log.info(f"Запрос на создание валюты. Method: POST. Path: /currencies")
     new_currency = await service.create_currency(currency)
 
     return new_currency

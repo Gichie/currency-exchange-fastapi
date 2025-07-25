@@ -1,7 +1,7 @@
 import logging
 from typing import Sequence
 
-from src.exceptions.exceptions import CurrencyNotExistError
+from src.exceptions.exceptions import CurrencyNotExistsError, CurrencyExistsError
 from src.models.currency import Currency
 from src.repositories.currency import CurrencyRepository
 from src.schemas.currency import CurrencyBase
@@ -20,7 +20,7 @@ class CurrencyService:
 
         async with self.repository.session.begin():
             if await self.repository.currency_exists(code):
-                raise Exception
+                raise CurrencyExistsError()
 
             new_currency = await self.repository.create_currency(code, name, sign)
 
@@ -40,4 +40,16 @@ class CurrencyService:
         if currency:
             return currency
         log.warning(f"Валюты: '{code}' нет в БД")
-        raise CurrencyNotExistError
+        raise CurrencyNotExistsError
+
+    async def get_codes_and_id_by_codes(self, codes: list[str]) -> dict[str, int]:
+        """
+        Принимает список кодов, возвращает словарь {код: id}.
+
+        Проверяет, что все запрошенные валюты существуют.
+        """
+        codes_and_id = await self.repository.get_codes_and_id_by_codes(codes)
+        if len(codes_and_id) != 2:
+            log.warning(f"Валюты: '{codes}' нет в БД")
+            raise CurrencyNotExistsError()
+        return dict(codes_and_id)

@@ -5,7 +5,36 @@ Accept: application/json
 
 ###
 
-GET http://127.0.0.1:8000/currency/
+GET http://127.0.0.1:8000/currency/qwe1
 Accept: application/json
+
+###
+
+POST http://127.0.0.1:8000/currencies
+Content-Type: application/x-www-form-urlencoded
+Accept: application/json
+
+code=usw&name=dfsfds&sign=s
+
+###
+
+GET http://127.0.0.1:8000/exchangeRate/
+Accept: application/json
+
+###
+
+POST http://127.0.0.1:8000/exchangeRates
+Content-Type: application/x-www-form-urlencoded
+Accept: application/json
+
+baseCurrencyCode=usq&targetCurrencyCode=sad&rate=10.2
+
+###
+
+PATCH http://127.0.0.1:8000/exchangeRate/usdss%D0%B9
+Content-Type: application/x-www-form-urlencoded
+Accept: application/json
+
+rate=19.2
 
 ###
