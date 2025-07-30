@@ -9,7 +9,7 @@ from starlette.requests import Request
 from starlette.responses import JSONResponse
 
 from src.exceptions.exceptions import CurrencyNotExistsError, CurrencyExistsError, \
-    ExchangeRateNotExistsError, ExchangeRateExistsError
+    ExchangeRateNotExistsError, ExchangeRateExistsError, SameCurrencyConversionError
 
 log = logging.getLogger(__name__)
 
@@ -32,7 +32,7 @@ async def database_connection_exception_handler(request: Request, exc: PostgresE
 
 
 async def database_exception_handler(request: Request, exc: SQLAlchemyError):
-    log.exception("Ошибка в ORM SQLAlchemy", request.method, request.url.path, exc)
+    log.error("Ошибка базы данных при запросе: %s %s", request.method, request.url.path, exc_info=exc)
     return JSONResponse(
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
         content={"message": "Сервис временно недоступен. Ошибка в базе данных."}
@@ -89,7 +89,15 @@ async def exchange_rate_not_found_handler(request: Request, exc: ExchangeRateNot
 async def exchange_rate_exists_handler(request: Request, exc: ExchangeRateExistsError):
     return JSONResponse(
         status_code=status.HTTP_409_CONFLICT,
-        content={"message": "Валютная пара с таким кодом уже существует"}
+        content={"message": "Такая валютная пара уже существует"}
+    )
+
+
+async def same_currency_exception_handler(request: Request, exc: SameCurrencyConversionError):
+    log.warning(f"Конвертация валюты в саму себя, {request.method}, {request.url.path}, {exc}")
+    return JSONResponse(
+        status_code=status.HTTP_400_BAD_REQUEST,
+        content={"message": "Нельзя конвертировать валюту в саму себя"}
     )
 
 
@@ -102,3 +110,4 @@ def register_exception_handlers(app: FastAPI) -> None:
     app.add_exception_handler(CurrencyExistsError, currency_exists_handler)
     app.add_exception_handler(ExchangeRateNotExistsError, exchange_rate_not_found_handler)
     app.add_exception_handler(ExchangeRateExistsError, exchange_rate_exists_handler)
+    app.add_exception_handler(SameCurrencyConversionError, same_currency_exception_handler)

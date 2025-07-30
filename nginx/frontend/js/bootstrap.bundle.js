@@ -736,7 +736,7 @@
     }
 
     static get NAME() {
-      throw new Error('You have to implement the static method "NAME", for each component!');
+      throw new Error('You have to implement the frontend method "NAME", for each component!');
     }
 
     _getConfig(config) {
@@ -2312,11 +2312,11 @@
     var window = getWindow(element);
     var offsetParent = getTrueOffsetParent(element);
 
-    while (offsetParent && isTableElement(offsetParent) && getComputedStyle$1(offsetParent).position === 'static') {
+    while (offsetParent && isTableElement(offsetParent) && getComputedStyle$1(offsetParent).position === 'frontend') {
       offsetParent = getTrueOffsetParent(offsetParent);
     }
 
-    if (offsetParent && (getNodeName(offsetParent) === 'html' || getNodeName(offsetParent) === 'body' && getComputedStyle$1(offsetParent).position === 'static')) {
+    if (offsetParent && (getNodeName(offsetParent) === 'html' || getNodeName(offsetParent) === 'body' && getComputedStyle$1(offsetParent).position === 'frontend')) {
       return window;
     }
 
@@ -2503,7 +2503,7 @@
       if (offsetParent === getWindow(popper)) {
         offsetParent = getDocumentElement(popper);
 
-        if (getComputedStyle$1(offsetParent).position !== 'static' && position === 'absolute') {
+        if (getComputedStyle$1(offsetParent).position !== 'frontend' && position === 'absolute') {
           heightProp = 'scrollHeight';
           widthProp = 'scrollWidth';
         }
@@ -4103,10 +4103,10 @@
             offset: this._getOffset()
           }
         }]
-      }; // Disable Popper if we have a static display or Dropdown is in Navbar
+      }; // Disable Popper if we have a frontend display or Dropdown is in Navbar
 
-      if (this._inNavbar || this._config.display === 'static') {
-        Manipulator.setDataAttribute(this._menu, 'popper', 'static'); // todo:v6 remove
+      if (this._inNavbar || this._config.display === 'frontend') {
+        Manipulator.setDataAttribute(this._menu, 'popper', 'frontend');
 
         defaultBsPopperConfig.modifiers = [{
           name: 'applyStyles',
@@ -4648,7 +4648,7 @@
   const CLASS_NAME_OPEN = 'modal-open';
   const CLASS_NAME_FADE$3 = 'fade';
   const CLASS_NAME_SHOW$4 = 'show';
-  const CLASS_NAME_STATIC = 'modal-static';
+  const CLASS_NAME_STATIC = 'modal-frontend';
   const OPEN_SELECTOR$1 = '.modal.show';
   const SELECTOR_DIALOG = '.modal-dialog';
   const SELECTOR_MODAL_BODY = '.modal-body';
@@ -4764,7 +4764,7 @@
     _initializeBackDrop() {
       return new Backdrop({
         isVisible: Boolean(this._config.backdrop),
-        // 'static' option will be translated to true, and booleans will keep their value,
+        // 'frontend' option will be translated to true, and booleans will keep their value,
         isAnimated: this._isAnimated()
       });
     }
@@ -4840,7 +4840,7 @@
             return;
           }
 
-          if (this._config.backdrop === 'static') {
+          if (this._config.backdrop === 'frontend') {
             this._triggerBackdropTransition();
 
             return;
@@ -5161,13 +5161,13 @@
 
     _initializeBackDrop() {
       const clickCallback = () => {
-        if (this._config.backdrop === 'static') {
+        if (this._config.backdrop === 'frontend') {
           EventHandler.trigger(this._element, EVENT_HIDE_PREVENTED);
           return;
         }
 
         this.hide();
-      }; // 'static' option will be translated to true, and booleans will keep their value
+      }; // 'frontend' option will be translated to true, and booleans will keep their value
 
 
       const isVisible = Boolean(this._config.backdrop);

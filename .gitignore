@@ -2,3 +2,5 @@
 .idea
 __pycache__
 /todo
+venv/
+pytest_cache/

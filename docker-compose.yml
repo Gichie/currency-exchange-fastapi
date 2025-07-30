@@ -1,0 +1,52 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: my-fastapi-backend
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./.env
+    depends_on:
+      - db
+    networks:
+      - my_app_network
+    command: >
+      sh -c "
+      poetry run alembic upgrade head &&
+      poetry run uvicorn src.main:app --host 0.0.0.0 --port 8000
+      "
+
+  nginx:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    container_name: my-nginx-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - my_app_network
+
+  db:
+    image: postgres:15.9-alpine3.20
+    container_name: my-postgres-db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    env_file:
+      - .env
+    ports:
+      - "5432:5432"
+    networks:
+      - my_app_network
+
+volumes:
+  postgres_data:
+
+networks:
+  my_app_network:
+    driver: bridge

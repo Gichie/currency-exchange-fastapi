@@ -20,3 +20,8 @@ class ExchangeRateNotExistsError(CurrencyExchangeError):
 class ExchangeRateExistsError(CurrencyExchangeError):
     """Исключение при наличии обменного курса в БД"""
     pass
+
+
+class SameCurrencyConversionError(CurrencyExchangeError):
+    """Исключение при конвертации валюты в саму себя"""
+    pass

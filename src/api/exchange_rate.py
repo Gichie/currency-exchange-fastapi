@@ -26,7 +26,8 @@ async def exchange_rate_by_code_pair(
     log.info(f"Запрос на получение обменного курса по валютной паре. "
              f"Method: GET. Path: /currency/{code_pair}")
 
-    exchange_rate = await service.get_exchange_rate(code_pair)
+    base_currency, target_currency = await service.parse_codes(code_pair)
+    exchange_rate = await service.get_exchange_rate(base_currency, target_currency)
     return exchange_rate
 
 

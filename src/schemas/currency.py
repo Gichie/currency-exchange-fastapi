@@ -9,6 +9,7 @@ class CurrencyBase(BaseModel):
     name: str = Field(min_length=2, max_length=40, examples=["US Dollar"])
     sign: str = Field(min_length=1, max_length=9, examples=["$"])
 
+    model_config = ConfigDict(from_attributes=True)
 
     @field_validator("code")
     @classmethod

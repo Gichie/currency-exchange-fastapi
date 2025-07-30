@@ -1,6 +1,6 @@
 from decimal import Decimal
 
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, Field, model_validator, ConfigDict
 
 from src.schemas.currency import CurrencyBase
 
@@ -9,7 +9,9 @@ class ExchangeRateSchema(BaseModel):
     id: int
     base_currency: CurrencyBase = Field(serialization_alias="baseCurrency")
     target_currency: CurrencyBase = Field(serialization_alias="targetCurrency")
-    rate: Decimal = Field(gt=0, max_digits=17, decimal_places=6)
+    rate: Decimal = Field(gt=0, max_digits=18, decimal_places=6)
+
+    model_config = ConfigDict(from_attributes=True)
 
 
 class ExchangeRateCreate(BaseModel):
@@ -26,3 +28,11 @@ class ExchangeRateCreate(BaseModel):
 
 class ExchangeRateUpdate(BaseModel):
     rate: Decimal = Field(gt=0, max_digits=17, decimal_places=6)
+
+
+class ExchangeCurrencyResponse(ExchangeRateSchema):
+    id: int = Field(exclude=True)
+    amount: Decimal = Field(gt=0, max_digits=18, decimal_places=2)
+    converted_amount: Decimal = Field(
+        ge=0, max_digits=19, decimal_places=2, serialization_alias='convertedAmount'
+    )
