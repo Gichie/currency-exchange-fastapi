@@ -23,17 +23,13 @@ class ExchangeRateService:
         return await self.repository.get_all_exchange_rates()
 
     @staticmethod
-    async def parse_codes(code_pair: str) -> tuple[str, str]:
+    def parse_codes(code_pair: str) -> tuple[str, str]:
         base_code = code_pair[:3].upper()
         target_code = code_pair[3:].upper()
         return base_code, target_code
 
-    async def get_exchange_rate(self, base_code: str, target_code: str) -> ExchangeRate:
-        base_id, target_id = await self._get_pair_currencies_id(
-            base_code, target_code
-        )
-
-        exchange_rate = await self.repository.get_exchange_rate_by_id_pair(base_id, target_id)
+    async def get_exchange_rate_by_codes(self, base_code: str, target_code: str) -> ExchangeRate:
+        exchange_rate = await self.repository.get_rate_by_codes(base_code, target_code)
 
         if not exchange_rate:
             log.warning(f"Обменного курса данных валют ({base_code}/{target_code}) нет в БД")
@@ -50,13 +46,17 @@ class ExchangeRateService:
             raise SameCurrencyConversionError()
 
         try:
-            straight_exchange_rate = await self.get_exchange_rate(base_currency, target_currency)
+            straight_exchange_rate = await self.get_exchange_rate_by_codes(base_currency, target_currency)
             rate = straight_exchange_rate.rate
         except ExchangeRateNotExistsError:
             try:
-                reverse_exchange_rate = await self.get_exchange_rate(target_currency, base_currency)
+                log.info(
+                    f"Попытка конвертировать по обратному курсу {target_currency}/{base_currency}"
+                )
+                reverse_exchange_rate = await self.get_exchange_rate_by_codes(target_currency, base_currency)
                 rate = 1 / reverse_exchange_rate.rate
             except ExchangeRateNotExistsError:
+                log.info("Попытка конвертировать через USD")
                 rate = await self._conversion_through_usd(base_currency, target_currency)
 
         rate = rate.quantize(Decimal('0.000001'), rounding=ROUND_HALF_UP)
@@ -85,8 +85,8 @@ class ExchangeRateService:
         return response_schema
 
     async def _conversion_through_usd(self, base_currency: str, target_currency: str):
-        usd_base_rate = await self.get_exchange_rate("USD", base_currency)
-        usd_target_rate = await self.get_exchange_rate("USD", target_currency)
+        usd_base_rate = await self.get_exchange_rate_by_codes("USD", base_currency)
+        usd_target_rate = await self.get_exchange_rate_by_codes("USD", target_currency)
         base_to_target_rate = usd_target_rate.rate / usd_base_rate.rate
         return base_to_target_rate
 
@@ -100,11 +100,14 @@ class ExchangeRateService:
                 base_code, target_code
             )
             try:
-                await self.repository.create_exchange_rate(base_id, target_id, rate)
+                new_exchange_rate = await self.repository.create_exchange_rate(
+                    base_id, target_id, rate
+                )
             except IntegrityError:
                 raise ExchangeRateExistsError()
 
-        new_exchange_rate = await self.repository.get_exchange_rate_by_id_pair(base_id, target_id)
+        await self.repository.session.refresh(new_exchange_rate, ['base_currency', 'target_currency'])
+
         return new_exchange_rate
 
     async def _get_pair_currencies_id(
@@ -118,10 +121,8 @@ class ExchangeRateService:
         return base_id, target_id
 
     async def update_exchange_rate(
-            self, code_pair: str, rate_form: ExchangeRateUpdate
+            self, base_code: str, target_code: str, rate_form: ExchangeRateUpdate
     ) -> ExchangeRate:
-        base_code = code_pair[:3].upper()
-        target_code = code_pair[3:].upper()
         rate = rate_form.rate
 
         async with self.repository.session.begin():

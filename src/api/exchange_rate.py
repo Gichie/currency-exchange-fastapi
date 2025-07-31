@@ -24,10 +24,10 @@ async def exchange_rate_by_code_pair(
         service: ExchangeRateService = Depends(get_exchange_rate_service)
 ):
     log.info(f"Запрос на получение обменного курса по валютной паре. "
-             f"Method: GET. Path: /currency/{code_pair}")
+             f"Method: GET. Path: /exchangeRate/{code_pair}")
 
-    base_currency, target_currency = await service.parse_codes(code_pair)
-    exchange_rate = await service.get_exchange_rate(base_currency, target_currency)
+    base_currency, target_currency = service.parse_codes(code_pair)
+    exchange_rate = await service.get_exchange_rate_by_codes(base_currency, target_currency)
     return exchange_rate
 
 
@@ -49,6 +49,7 @@ async def update_exchange_rate(
         service: ExchangeRateService = Depends(get_exchange_rate_service)
 ):
     log.info(f"Запрос на обновление обменного курса. Method: PATCH. Path: /exchangeRate/{code_pair}")
-    updated_rate = await service.update_exchange_rate(code_pair, rate_form)
+    base_currency, target_currency = service.parse_codes(code_pair)
+    updated_rate = await service.update_exchange_rate(base_currency, target_currency, rate_form)
     return updated_rate
 
