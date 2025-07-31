@@ -11,7 +11,7 @@ from sqlalchemy.exc import OperationalError
 from src.core.config import LOGGING_CONFIG_PATH
 from src.core.dependencies import get_currency_service
 from src.main import app
-from src.schemas.currency import CurrencyBase
+from src.schemas.currency import CurrencyScheme
 from src.services.currency_service import CurrencyService
 
 CURRENCIES = [
@@ -74,7 +74,7 @@ def mock_currency_service():
     Автоматически очищает dependency_overrides после завершения теста.
     """
     mock_service = AsyncMock(spec=CurrencyService)
-    mock_service.get_all_currencies.return_value = [CurrencyBase(**data) for data in CURRENCIES]
+    mock_service.get_all_currencies.return_value = [CurrencyScheme(**data) for data in CURRENCIES]
 
     app.dependency_overrides[get_currency_service] = lambda: mock_service
 

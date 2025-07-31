@@ -5,7 +5,7 @@ from fastapi import APIRouter, Form, Depends, Path
 from starlette import status
 
 from src.core.dependencies import get_currency_service
-from src.schemas.currency import CurrencyBase
+from src.schemas.currency import CurrencyScheme
 from src.services.currency_service import CurrencyService
 
 log = logging.getLogger(__name__)
@@ -13,14 +13,14 @@ log = logging.getLogger(__name__)
 router = APIRouter()
 
 
-@router.get("/currencies", response_model=list[CurrencyBase])
+@router.get("/currencies", response_model=list[CurrencyScheme])
 async def get_currencies(service: CurrencyService = Depends(get_currency_service)):
     log.info("Запрос на получение списка всех валют. Method: GET. Path: /currencies")
-    all_currencies = await service.get_all_currencies()
+    all_currencies = await service.repository.get_all_currencies()
     return all_currencies
 
 
-@router.get("/currency/{code}", response_model=CurrencyBase)
+@router.get("/currency/{code}", response_model=CurrencyScheme)
 async def get_currency_by_code(
         code: Annotated[str, Path(pattern="^[a-zA-Z]{3}$")],
         service: CurrencyService = Depends(get_currency_service)
@@ -30,15 +30,9 @@ async def get_currency_by_code(
     return currency
 
 
-@router.get("/currency/", status_code=status.HTTP_400_BAD_REQUEST)
-async def get_currency_missing_code():
-    log.warning(f"Запрос на получение валюты без кода. Method: GET. Path: /currency/")
-    return {"message": "Код валюты не указан"}
-
-
-@router.post("/currencies", response_model=CurrencyBase, status_code=status.HTTP_201_CREATED)
+@router.post("/currencies", response_model=CurrencyScheme, status_code=status.HTTP_201_CREATED)
 async def create_currency(
-        currency: Annotated[CurrencyBase, Form()],
+        currency: Annotated[CurrencyScheme, Form()],
         service: CurrencyService = Depends(get_currency_service)
 ):
     log.info(f"Запрос на создание валюты. Method: POST. Path: /currencies")

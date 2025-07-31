@@ -2,13 +2,13 @@ from decimal import Decimal
 
 from pydantic import BaseModel, Field, model_validator, ConfigDict
 
-from src.schemas.currency import CurrencyBase
+from src.schemas.currency import CurrencyScheme
 
 
 class ExchangeRateSchema(BaseModel):
     id: int
-    base_currency: CurrencyBase = Field(serialization_alias="baseCurrency")
-    target_currency: CurrencyBase = Field(serialization_alias="targetCurrency")
+    base_currency: CurrencyScheme = Field(serialization_alias="baseCurrency")
+    target_currency: CurrencyScheme = Field(serialization_alias="targetCurrency")
     rate: Decimal = Field(gt=0, max_digits=18, decimal_places=6)
 
     model_config = ConfigDict(from_attributes=True)

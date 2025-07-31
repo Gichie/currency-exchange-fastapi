@@ -1,10 +1,11 @@
 import logging
 
 from asyncpg import PostgresError
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI
 from fastapi.exceptions import RequestValidationError
 from sqlalchemy.exc import SQLAlchemyError
 from starlette import status
+from starlette.exceptions import HTTPException as StarletteHTTPException
 from starlette.requests import Request
 from starlette.responses import JSONResponse
 
@@ -101,6 +102,18 @@ async def same_currency_exception_handler(request: Request, exc: SameCurrencyCon
     )
 
 
+async def custom_http_exception_handler(request: Request, exc: StarletteHTTPException):
+    if exc.status_code == 404:
+        return JSONResponse(
+            status_code=404,
+            content={"message": "Запрашиваемый ресурс не найден. Проверьте URL."},
+        )
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"detail": exc.detail},
+    )
+
+
 def register_exception_handlers(app: FastAPI) -> None:
     """Регистрирует обработчики исключений для FastAPI приложения."""
     app.add_exception_handler(PostgresError, database_connection_exception_handler)
@@ -111,3 +124,4 @@ def register_exception_handlers(app: FastAPI) -> None:
     app.add_exception_handler(ExchangeRateNotExistsError, exchange_rate_not_found_handler)
     app.add_exception_handler(ExchangeRateExistsError, exchange_rate_exists_handler)
     app.add_exception_handler(SameCurrencyConversionError, same_currency_exception_handler)
+    app.add_exception_handler(StarletteHTTPException, custom_http_exception_handler)

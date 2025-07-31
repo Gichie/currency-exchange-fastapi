@@ -1,8 +1,8 @@
 from pydantic import BaseModel, Field, field_validator, ConfigDict
 
 
-class CurrencyBase(BaseModel):
-    id: int | None = None
+class CurrencyScheme(BaseModel):
+    id: int
     code: str = Field(
         pattern="^[a-zA-Z]{3}$", description="ISO 4217 currency code.", examples=["USD", "EUR"]
     )

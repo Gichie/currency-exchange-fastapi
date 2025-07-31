@@ -1,6 +1,8 @@
 import logging
 from decimal import Decimal, ROUND_HALF_UP
 
+from sqlalchemy.exc import IntegrityError
+
 from src.exceptions.exceptions import ExchangeRateNotExistsError, ExchangeRateExistsError, \
     SameCurrencyConversionError
 from src.models.exchange_rate import ExchangeRate
@@ -97,15 +99,10 @@ class ExchangeRateService:
             base_id, target_id = await self._get_pair_currencies_id(
                 base_code, target_code
             )
-
-            if await self.repository.exchange_rate_exists(base_id, target_id):
-                log.warning(
-                    f"Заданный обменный курс ({base_code}/{target_code})"
-                    f"уже есть в БД."
-                )
+            try:
+                await self.repository.create_exchange_rate(base_id, target_id, rate)
+            except IntegrityError:
                 raise ExchangeRateExistsError()
-
-            await self.repository.create_exchange_rate(base_id, target_id, rate)
 
         new_exchange_rate = await self.repository.get_exchange_rate_by_id_pair(base_id, target_id)
         return new_exchange_rate
@@ -131,13 +128,6 @@ class ExchangeRateService:
             base_id, target_id = await self._get_pair_currencies_id(
                 base_code, target_code
             )
-
-            if not await self.repository.exchange_rate_exists(base_id, target_id):
-                log.warning(
-                    f"Заданный обменный курс ({base_code}/{target_code})"
-                    f"уже есть в БД."
-                )
-                raise ExchangeRateNotExistsError()
 
             exchange_rate = await self.repository.update_exchange_rate(base_id, target_id, rate)
 
