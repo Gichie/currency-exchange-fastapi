@@ -1,6 +1,6 @@
 from decimal import Decimal
 
-from sqlalchemy import select, exists, update
+from sqlalchemy import select, exists, update, and_, or_
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload, aliased, contains_eager
 
@@ -21,14 +21,6 @@ class ExchangeRateRepository:
         ))
         result = await self.session.execute(query)
         return result.scalars().all()
-
-    async def exchange_rate_exists(self, base_code: int, target_code: int) -> bool:
-        """Проверяет наличие обменного курса в БД."""
-        query = select(exists(ExchangeRate).where(
-            ExchangeRate.base_currency_id == base_code, ExchangeRate.target_currency_id == target_code
-        ))
-        result = await self.session.scalar(query)
-        return bool(result)
 
     async def create_exchange_rate(self, base_id: int, target_id: int, rate: Decimal) -> ExchangeRate:
         """Создает обменный курс для валютной пары."""
@@ -73,3 +65,30 @@ class ExchangeRateRepository:
         )
         result = await self.session.execute(query)
         return result.scalar_one_or_none()
+
+    async def get_exchange_rates(self, possible_pairs: list[tuple[str, str]]) -> list[ExchangeRate]:
+        BaseCurrency = aliased(Currency)
+        TargetCurrency = aliased(Currency)
+
+        conditions = [
+            and_(
+                BaseCurrency.code == base, TargetCurrency.code == target
+            ) for base, target in possible_pairs
+        ]
+
+        if not conditions:
+            return []
+
+        query = (
+            select(ExchangeRate)
+            .join(BaseCurrency, ExchangeRate.base_currency_id == BaseCurrency.id)
+            .join(TargetCurrency, ExchangeRate.target_currency_id == TargetCurrency.id)
+            .where(or_(*conditions))
+            .options(
+                contains_eager(ExchangeRate.base_currency, alias=BaseCurrency),
+                contains_eager(ExchangeRate.target_currency, alias=TargetCurrency)
+            )
+        )
+
+        result = await self.session.execute(query)
+        return result.scalars().all()

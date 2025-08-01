@@ -30,9 +30,12 @@ class ExchangeRateUpdate(BaseModel):
     rate: Decimal = Field(gt=0, max_digits=17, decimal_places=6)
 
 
-class ExchangeCurrencyResponse(ExchangeRateSchema):
-    id: int = Field(exclude=True)
+class ExchangeCurrencyResponse(BaseModel):
+    base_currency: CurrencyScheme = Field(serialization_alias="baseCurrency")
+    target_currency: CurrencyScheme = Field(serialization_alias="targetCurrency")
+    rate: Decimal = Field(gt=0, max_digits=19, decimal_places=6)
     amount: Decimal = Field(gt=0, max_digits=18, decimal_places=2)
     converted_amount: Decimal = Field(
         ge=0, max_digits=19, decimal_places=2, serialization_alias='convertedAmount'
     )
+    model_config = ConfigDict(from_attributes=True)

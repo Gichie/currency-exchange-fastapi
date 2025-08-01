@@ -40,55 +40,67 @@ class ExchangeRateService:
     async def exchange_currencies(self, base_currency: str, target_currency: str, amount: Decimal):
         base_currency = base_currency.upper()
         target_currency = target_currency.upper()
-        straight_exchange_rate = None
 
         if base_currency == target_currency:
             raise SameCurrencyConversionError()
 
-        try:
-            straight_exchange_rate = await self.get_exchange_rate_by_codes(base_currency, target_currency)
-            rate = straight_exchange_rate.rate
-        except ExchangeRateNotExistsError:
-            try:
-                log.info(
-                    f"Попытка конвертировать по обратному курсу {target_currency}/{base_currency}"
-                )
-                reverse_exchange_rate = await self.get_exchange_rate_by_codes(target_currency, base_currency)
-                rate = 1 / reverse_exchange_rate.rate
-            except ExchangeRateNotExistsError:
-                log.info("Попытка конвертировать через USD")
-                rate = await self._conversion_through_usd(base_currency, target_currency)
+        possible_exchange_rates = [
+            (base_currency, target_currency),
+            (target_currency, base_currency),
+        ]
+
+        if base_currency != "USD" and target_currency != "USD":
+            possible_exchange_rates.append(("USD", base_currency))
+            possible_exchange_rates.append(("USD", target_currency))
+
+        available_exchange_rates = await self.repository.get_exchange_rates(possible_exchange_rates)
+
+        rates_map = {
+            (exch_rate.base_currency.code, exch_rate.target_currency.code): exch_rate
+            for exch_rate in available_exchange_rates
+        }
+
+        if (base_currency, target_currency) in rates_map:
+            log.info(f"Найден прямой курс {base_currency}/{target_currency}")
+            exchange_rate = rates_map[(base_currency, target_currency)]
+
+            rate = exchange_rate.rate
+            base_currency_obj = exchange_rate.base_currency
+            target_currency_obj = exchange_rate.target_currency
+
+        elif (target_currency, base_currency) in rates_map:
+            log.info(f"Найден обратный курс {target_currency}/{base_currency}")
+            exchange_rate = rates_map[(target_currency, base_currency)]
+
+            rate = 1 / exchange_rate.rate
+            base_currency_obj = exchange_rate.target_currency
+            target_currency_obj = exchange_rate.base_currency
+
+        elif ("USD", base_currency) in rates_map and ("USD", target_currency) in rates_map:
+            log.info("Найден кросс курс через USD")
+            exchange_rate_usd_base = rates_map[("USD", base_currency)]
+            exchange_rate_usd_target = rates_map[("USD", target_currency)]
+
+            rate = exchange_rate_usd_target.rate / exchange_rate_usd_base.rate
+            base_currency_obj = exchange_rate_usd_base.target_currency
+            target_currency_obj = exchange_rate_usd_target.target_currency
+        else:
+            raise ExchangeRateNotExistsError()
 
         rate = rate.quantize(Decimal('0.000001'), rounding=ROUND_HALF_UP)
 
         converted_amount = (rate * amount).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
 
-        if straight_exchange_rate:
-            base_data = ExchangeRateSchema.model_validate(straight_exchange_rate)
-            response_schema = ExchangeCurrencyResponse(
-                **base_data.model_dump(), amount=amount, converted_amount=converted_amount
-            )
-        else:
-            base_currency_model = await self.currency_service.get_currency_by_code(base_currency)
-            target_currency_model = await self.currency_service.get_currency_by_code(target_currency)
-
-            prepared_data = {
-                "id": 1,
-                "base_currency": base_currency_model,
-                "target_currency": target_currency_model,
-                "rate": rate,
-                "amount": amount,
-                "converted_amount": converted_amount
-            }
-            response_schema = ExchangeCurrencyResponse.model_validate(prepared_data)
+        prepared_data = {
+            "base_currency": base_currency_obj,
+            "target_currency": target_currency_obj,
+            "rate": rate,
+            "amount": amount,
+            "converted_amount": converted_amount
+        }
+        response_schema = ExchangeCurrencyResponse.model_validate(prepared_data)
 
         return response_schema
-
-    async def _conversion_through_usd(self, base_currency: str, target_currency: str):
-        usd_base_rate = await self.get_exchange_rate_by_codes("USD", base_currency)
-        usd_target_rate = await self.get_exchange_rate_by_codes("USD", target_currency)
-        base_to_target_rate = usd_target_rate.rate / usd_base_rate.rate
-        return base_to_target_rate
 
     async def create_exchange_rate(self, exchange_rate: ExchangeRateCreate) -> ExchangeRate:
         base_code = exchange_rate.base_currency_code.upper()
