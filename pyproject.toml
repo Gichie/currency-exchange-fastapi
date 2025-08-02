@@ -29,4 +29,39 @@ build-backend = "poetry.core.masonry.api"
 pytest = "^8.4.1"
 pytest-asyncio = "^1.1.0"
 httpx = "^0.28.1"
+mypy = "^1.17.1"
+types-requests = "^2.32.4.20250611"
+types-pyyaml = "^6.0.12.20250516"
 
+[tool.mypy]
+python_version = "3.12"
+plugins = "pydantic.mypy"
+
+# Запретить определять функции без аннотаций типов
+disallow_untyped_defs = true
+# Требовать явного указания "Optional" (например, str | None вместо неявного)
+no_implicit_optional = true
+# Предупреждать, если функция возвращает тип "Any"
+warn_return_any = true
+# Предупреждать о неиспользуемых директивах # type: ignore
+warn_unused_ignores = true
+# Игнорировать ошибки импорта для библиотек без аннотаций (стабов)
+ignore_missing_imports = true
+# Показывать номера колонок в сообщениях об ошибках
+show_column_numbers = true
+
+# Какие папки/файлы исключить из проверки
+exclude = [
+    ".venv",
+    "venv",
+    "build",
+    "migrations/versions" # Часто генерируемые alembic-миграции не типизированы
+]
+
+[tool.pydantic-mypy]
+# Запретить передавать лишние поля при создании модели
+init_forbid_extra = true
+# Проверять, что все поля в __init__ типизированы
+init_typed = true
+# Предупреждать об использовании динамических алиасов
+warn_required_dynamic_aliases = true

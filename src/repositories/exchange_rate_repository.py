@@ -1,6 +1,7 @@
 from decimal import Decimal
+from typing import Sequence, Any
 
-from sqlalchemy import select, exists, update, and_, or_
+from sqlalchemy import select, exists, update, and_, or_, Row, RowMapping
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload, aliased, contains_eager
 
@@ -13,7 +14,7 @@ class ExchangeRateRepository:
     def __init__(self, session: AsyncSession):
         self.session = session
 
-    async def get_all_exchange_rates(self) -> list[ExchangeRate]:
+    async def get_all_exchange_rates(self) -> Sequence[ExchangeRate]:
         """Получает список всех обменных курсов."""
         query = (select(ExchangeRate).options(
             joinedload(ExchangeRate.base_currency),
@@ -66,7 +67,9 @@ class ExchangeRateRepository:
         result = await self.session.execute(query)
         return result.scalar_one_or_none()
 
-    async def get_exchange_rates(self, possible_pairs: list[tuple[str, str]]) -> list[ExchangeRate]:
+    async def get_exchange_rates(
+            self, possible_pairs: list[tuple[str, str]]
+    ) -> Sequence[Row[Any] | RowMapping | Any]:
         BaseCurrency = aliased(Currency)
         TargetCurrency = aliased(Currency)
 

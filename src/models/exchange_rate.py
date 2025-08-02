@@ -1,9 +1,13 @@
 from decimal import Decimal
+from typing import TYPE_CHECKING
 
 from sqlalchemy import ForeignKey, Numeric, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.core.db.base import Base
+
+if TYPE_CHECKING:
+    from .currency import Currency
 
 
 class ExchangeRate(Base):

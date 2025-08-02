@@ -1,5 +1,6 @@
 import logging
 from decimal import Decimal, ROUND_HALF_UP
+from typing import Sequence
 
 from sqlalchemy.exc import IntegrityError
 
@@ -19,7 +20,7 @@ class ExchangeRateService:
         self.repository = repository
         self.currency_service = currency_service
 
-    async def get_all_exchange_rates(self) -> list[ExchangeRate]:
+    async def get_all_exchange_rates(self) -> Sequence[ExchangeRate]:
         return await self.repository.get_all_exchange_rates()
 
     @staticmethod
@@ -37,7 +38,19 @@ class ExchangeRateService:
 
         return exchange_rate
 
-    async def exchange_currencies(self, base_currency: str, target_currency: str, amount: Decimal):
+    async def exchange_currencies(
+            self, base_currency: str, target_currency: str, amount: Decimal
+    ) -> ExchangeCurrencyResponse:
+        """Конвертирует указанную сумму из базовой валюты в целевую.
+
+        Метод реализует трехуровневую стратегию поиска обменного курса:
+        1.  **Прямой курс:** Поиск прямого курса (BASE -> TARGET).
+        2.  **Обратный курс:** Если прямой курс не найден, выполняется поиск
+            обратного курса (TARGET -> BASE) и его значение инвертируется (1/rate).
+        3.  **Кросс-курс:** Если предыдущие шаги не увенчались успехом,
+            выполняется попытка конвертации через базовую валюту USD по формуле
+            (USD -> TARGET) / (USD -> BASE).
+        """
         base_currency = base_currency.upper()
         target_currency = target_currency.upper()
 

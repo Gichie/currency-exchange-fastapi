@@ -1,7 +1,12 @@
+from typing import TYPE_CHECKING
+
 from sqlalchemy import String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.core.db.base import Base
+
+if TYPE_CHECKING:
+    from .exchange_rate import ExchangeRate
 
 
 class Currency(Base):

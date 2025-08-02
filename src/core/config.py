@@ -16,7 +16,7 @@ class Settings(BaseSettings):
     POSTGRES_PORT: int
 
     @property
-    def ASYNC_DATABASE_URL(self):
+    def ASYNC_DATABASE_URL(self) -> str:
         return (
             f"postgresql+asyncpg://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@{self.POSTGRES_HOST}:"
             f"{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
@@ -28,7 +28,7 @@ settings = Settings()
 LOGGING_CONFIG_PATH = Path(__file__).resolve().parent.parent.parent / "logging_config.yaml"
 
 
-def setup_logging():
+def setup_logging() -> None:
     """Загружает конфигурацию логгирования из YAML файла и применяет ее."""
     with open(LOGGING_CONFIG_PATH) as conf:
         logging_config = yaml.safe_load(conf)

@@ -1,4 +1,5 @@
 import logging.config
+from collections.abc import Generator
 from typing import AsyncGenerator
 from unittest.mock import AsyncMock
 
@@ -15,12 +16,12 @@ from src.schemas.currency import CurrencyScheme
 from src.services.currency_service import CurrencyService
 
 CURRENCIES = [
-    {'id': 1, 'code': "USD", 'name': "USDUSDUSD", 'sign': "$"},
-    {'id': 2, 'code': "EUR", 'name': "EUROPIAN", 'sign': "eu"},
+    CurrencyScheme(id=1, code="USD", name="USDUSDUSD", sign="$"),
+    CurrencyScheme(id=2, code="EUR", name="EUROPIAN", sign="eu")
 ]
 
 
-def setup_project_logging():
+def setup_project_logging() -> None:
     """
     Настраивает логгирование для проекта на основе YAML-конфига.
 
@@ -36,7 +37,7 @@ def setup_project_logging():
         print(f"\nВнимание: Файл конфигурации логгирования не найден: {config_path}")
 
 
-def pytest_configure(config):
+def pytest_configure() -> None:
     """Позволяет настроить конфигурацию перед запуском тестов."""
     setup_project_logging()
 
@@ -49,14 +50,14 @@ async def ac() -> AsyncGenerator[AsyncClient, None]:
 
 
 @pytest.fixture
-def mock_currency_service_db_error():
+def mock_currency_service_db_error() -> Generator[AsyncMock]:
     """
     Фикстура для мокирования CurrencyService с ошибкой базы данных.
 
     Автоматически очищает dependency_overrides после завершения теста.
     """
     mock_service = AsyncMock(spec=CurrencyService)
-    exc = OperationalError("DB connection failed", params=None, orig=None)
+    exc = OperationalError("DB connection failed", params=None, orig=BaseException())
     mock_service.get_all_currencies.side_effect = exc
 
     app.dependency_overrides[get_currency_service] = lambda: mock_service
@@ -67,14 +68,14 @@ def mock_currency_service_db_error():
 
 
 @pytest.fixture
-def mock_currency_service():
+def mock_currency_service() -> Generator[AsyncMock]:
     """
     Фикстура для мокирования CurrencyService.
 
     Автоматически очищает dependency_overrides после завершения теста.
     """
     mock_service = AsyncMock(spec=CurrencyService)
-    mock_service.get_all_currencies.return_value = [CurrencyScheme(**data) for data in CURRENCIES]
+    mock_service.get_all_currencies.return_value = CURRENCIES
 
     app.dependency_overrides[get_currency_service] = lambda: mock_service
 

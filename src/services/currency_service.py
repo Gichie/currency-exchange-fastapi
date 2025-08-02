@@ -36,7 +36,7 @@ class CurrencyService:
         if currency:
             return currency
         log.warning(f"Валюты: '{code}' нет в БД")
-        raise CurrencyNotExistsError
+        raise CurrencyNotExistsError()
 
     async def get_codes_and_id_by_codes(self, codes: list[str]) -> dict[str, int]:
         """
@@ -48,4 +48,8 @@ class CurrencyService:
         if len(codes_and_id) != 2:
             log.warning(f"Валюты: '{codes}' нет в БД")
             raise CurrencyNotExistsError()
-        return dict(codes_and_id)
+        return {row.code: row.id for row in codes_and_id}
+
+    async def get_all_currencies(self) -> Sequence[Currency]:
+        currencies = await self.repository.get_all_currencies()
+        return currencies

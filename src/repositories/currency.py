@@ -1,6 +1,6 @@
-from typing import Sequence
+from typing import Sequence, Tuple, Any
 
-from sqlalchemy import select, exists
+from sqlalchemy import select, exists, Row
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.models.currency import Currency
@@ -21,13 +21,13 @@ class CurrencyRepository:
         result = await self.session.execute(select(Currency))
         return result.scalars().all()
 
-    async def get_currency_by_code(self, code: str):
+    async def get_currency_by_code(self, code: str) -> Currency | None:
         """Получает одну валюту по её коду."""
         query = select(Currency).where(Currency.code == code)
         result = await self.session.execute(query)
         return result.scalar_one_or_none()
 
-    async def get_codes_and_id_by_codes(self, codes: list[str]) -> list[tuple[str, int]]:
+    async def get_codes_and_id_by_codes(self, codes: list[str]) -> Sequence[Row[tuple[Any, Any]]]:
         """Получает список кортежей (code, id) по списку кодов валют."""
         query = select(Currency.code, Currency.id).where(Currency.code.in_(codes))
         result = await self.session.execute(query)
