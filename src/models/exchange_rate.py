@@ -20,11 +20,11 @@ class ExchangeRate(Base):
 
     base_currency: Mapped["Currency"] = relationship(
         foreign_keys=[base_currency_id],
-        back_populates="base"
+        back_populates="base",
     )
     target_currency: Mapped["Currency"] = relationship(
         foreign_keys=[target_currency_id],
-        back_populates="target"
+        back_populates="target",
     )
 
     __table_args__ = (

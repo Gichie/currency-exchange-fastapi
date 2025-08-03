@@ -16,7 +16,7 @@ from src.services.currency_service import CurrencyService
 
 CURRENCIES = [
     CurrencyScheme(id=1, code="USD", name="USDUSDUSD", sign="$"),
-    CurrencyScheme(id=2, code="EUR", name="EUROPIAN", sign="eu")
+    CurrencyScheme(id=2, code="EUR", name="EUROPIAN", sign="eu"),
 ]
 
 
@@ -28,7 +28,7 @@ def setup_project_logging() -> None:
     """
     config_path = LOGGING_CONFIG_PATH
     if config_path.is_file():
-        with open(config_path) as conf_file:
+        with config_path.open() as conf_file:
             logging_config = yaml.safe_load(conf_file)
         logging.config.dictConfig(logging_config)
         print("\nКастомная конфигурация логгирования применена.")
@@ -51,7 +51,7 @@ async def ac() -> AsyncGenerator[AsyncClient]:
 @pytest.fixture
 def mock_currency_service_db_error() -> Generator[AsyncMock]:
     """
-    Фикстура для мокирования CurrencyService с ошибкой базы данных.
+    Фикстура для мокирования CurrencyService c ошибкой базы данных.
 
     Автоматически очищает dependency_overrides после завершения теста.
     """

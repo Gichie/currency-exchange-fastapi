@@ -19,10 +19,10 @@ class Currency(Base):
 
     base: Mapped[list["ExchangeRate"]] = relationship(
         back_populates="base_currency",
-        foreign_keys="ExchangeRate.base_currency_id"
+        foreign_keys="ExchangeRate.base_currency_id",
     )
 
     target: Mapped[list["ExchangeRate"]] = relationship(
         back_populates="target_currency",
-        foreign_keys="ExchangeRate.target_currency_id"
+        foreign_keys="ExchangeRate.target_currency_id",
     )

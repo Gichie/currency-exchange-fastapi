@@ -1,11 +1,9 @@
 class CurrencyExchangeError(Exception):
     """Базовое исключение."""
-    pass
 
 
 class CurrencyNotExistsError(CurrencyExchangeError):
     """Исключение при отсутствии валюты в БД"""
-    pass
 
 
 class CurrencyExistsError(CurrencyExchangeError):
@@ -14,14 +12,11 @@ class CurrencyExistsError(CurrencyExchangeError):
 
 class ExchangeRateNotExistsError(CurrencyExchangeError):
     """Исключение при отсутствии обменного курса в БД"""
-    pass
 
 
 class ExchangeRateExistsError(CurrencyExchangeError):
     """Исключение при наличии обменного курса в БД"""
-    pass
 
 
 class SameCurrencyConversionError(CurrencyExchangeError):
     """Исключение при конвертации валюты в саму себя"""
-    pass

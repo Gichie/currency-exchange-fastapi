@@ -4,7 +4,7 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator
 class CurrencyScheme(BaseModel):
     id: int | None = None
     code: str = Field(
-        pattern="^[a-zA-Z]{3}$", description="ISO 4217 currency code.", examples=["USD", "EUR"]
+        pattern="^[a-zA-Z]{3}$", description="ISO 4217 currency code.", examples=["USD", "EUR"],
     )
     name: str = Field(min_length=1, max_length=40, examples=["US Dollar"])
     sign: str = Field(min_length=1, max_length=8, examples=["$"])

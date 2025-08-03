@@ -18,14 +18,14 @@ def get_currency_repository(session: AsyncSession = Depends(get_session)) -> Cur
 
 
 def get_currency_service(
-        repository: CurrencyRepository = Depends(get_currency_repository)
+        repository: CurrencyRepository = Depends(get_currency_repository),
 ) -> CurrencyService:
     """Провайдер для CurrencyService. Создает экземпляр сервиса для валют с готовым репозиторием."""
     return CurrencyService(repository=repository)
 
 
 def get_exchange_rate_repository(
-        session: AsyncSession = Depends(get_session)
+        session: AsyncSession = Depends(get_session),
 ) -> ExchangeRateRepository:
     """
     Провайдер для CurrencyRepository.
@@ -37,7 +37,7 @@ def get_exchange_rate_repository(
 
 def get_exchange_rate_service(
         repository: ExchangeRateRepository = Depends(get_exchange_rate_repository),
-        currency_service: CurrencyService = Depends(get_currency_service)
+        currency_service: CurrencyService = Depends(get_currency_service),
 ) -> ExchangeRateService:
     """
     Провайдер для CurrencyService.

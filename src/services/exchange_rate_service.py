@@ -27,10 +27,10 @@ class ExchangeRateService:
         return base_code, target_code
 
     async def _get_pair_currencies_id(
-            self, base_currency_code: str, target_currency_code: str
+            self, base_currency_code: str, target_currency_code: str,
     ) -> tuple[int, int]:
         currencies_data = await self.currency_service.get_codes_and_id_by_codes(
-            [base_currency_code, target_currency_code]
+            [base_currency_code, target_currency_code],
         )
         base_id = currencies_data[base_currency_code]
         target_id = currencies_data[target_currency_code]
@@ -44,12 +44,12 @@ class ExchangeRateService:
 
         if not exchange_rate:
             log.warning(f"Обменного курса данных валют ({base_code}/{target_code}) нет в БД")
-            raise ExchangeRateNotExistsError()
+            raise ExchangeRateNotExistsError
 
         return exchange_rate
 
     async def _collects_possible_exchange_rates(
-            self, base_currency: str, target_currency: str
+            self, base_currency: str, target_currency: str,
     ) -> list[tuple[str, str]]:
 
         possible_exchange_rates = [
@@ -64,7 +64,7 @@ class ExchangeRateService:
         return possible_exchange_rates
 
     async def exchange_currencies(
-            self, base_currency: str, target_currency: str, amount: Decimal
+            self, base_currency: str, target_currency: str, amount: Decimal,
     ) -> ExchangeCurrencyResponse:
         """Конвертирует указанную сумму из базовой валюты в целевую.
 
@@ -78,7 +78,7 @@ class ExchangeRateService:
         """
 
         possible_exchange_rates = await self._collects_possible_exchange_rates(
-            base_currency, target_currency
+            base_currency, target_currency,
         )
 
         available_exchange_rates = await self.repository.get_exchange_rates(possible_exchange_rates)
@@ -112,22 +112,21 @@ class ExchangeRateService:
             target_currency_obj = cross_rate_usd_target.target_currency
 
         else:
-            raise ExchangeRateNotExistsError()
+            raise ExchangeRateNotExistsError
 
-        rate = rate.quantize(Decimal('0.000001'), rounding=ROUND_HALF_UP)
+        rate = rate.quantize(Decimal("0.000001"), rounding=ROUND_HALF_UP)
 
-        converted_amount = (rate * amount).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+        converted_amount = (rate * amount).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
 
         prepared_data = {
             "base_currency": base_currency_obj,
             "target_currency": target_currency_obj,
             "rate": rate,
             "amount": amount,
-            "converted_amount": converted_amount
+            "converted_amount": converted_amount,
         }
-        response_schema = ExchangeCurrencyResponse.model_validate(prepared_data)
 
-        return response_schema
+        return ExchangeCurrencyResponse.model_validate(prepared_data)
 
     async def create_exchange_rate(self, exchange_rate: ExchangeRateCreate) -> ExchangeRate:
         base_code = exchange_rate.base_currency_code.upper()
@@ -136,29 +135,27 @@ class ExchangeRateService:
 
         async with self.repository.session.begin():
             base_id, target_id = await self._get_pair_currencies_id(
-                base_code, target_code
+                base_code, target_code,
             )
             try:
                 new_exchange_rate = await self.repository.create_exchange_rate(
-                    base_id, target_id, rate
+                    base_id, target_id, rate,
                 )
             except IntegrityError as err:
-                raise ExchangeRateExistsError() from err
+                raise ExchangeRateExistsError from err
 
-        await self.repository.session.refresh(new_exchange_rate, ['base_currency', 'target_currency'])
+        await self.repository.session.refresh(new_exchange_rate, ["base_currency", "target_currency"])
 
         return new_exchange_rate
 
     async def update_exchange_rate(
-            self, base_code: str, target_code: str, rate_form: ExchangeRateUpdate
+            self, base_code: str, target_code: str, rate_form: ExchangeRateUpdate,
     ) -> ExchangeRate:
         rate = rate_form.rate
 
         async with self.repository.session.begin():
             base_id, target_id = await self._get_pair_currencies_id(
-                base_code, target_code
+                base_code, target_code,
             )
 
-            exchange_rate = await self.repository.update_exchange_rate(base_id, target_id, rate)
-
-        return exchange_rate
+            return await self.repository.update_exchange_rate(base_id, target_id, rate)

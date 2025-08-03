@@ -24,7 +24,7 @@ class CurrencyService:
             try:
                 new_currency = await self.repository.create_currency(code, name, sign)
             except IntegrityError as err:
-                raise CurrencyExistsError() from err
+                raise CurrencyExistsError from err
 
             await self.repository.session.refresh(new_currency)
 
@@ -36,7 +36,7 @@ class CurrencyService:
         if currency:
             return currency
         log.warning(f"Валюты: '{code}' нет в БД")
-        raise CurrencyNotExistsError()
+        raise CurrencyNotExistsError
 
     async def get_codes_and_id_by_codes(self, codes: list[str]) -> dict[str, int]:
         """
@@ -47,9 +47,8 @@ class CurrencyService:
         codes_and_id = await self.repository.get_codes_and_id_by_codes(codes)
         if len(codes_and_id) != 2:
             log.warning(f"Валюты: '{codes}' нет в БД")
-            raise CurrencyNotExistsError()
+            raise CurrencyNotExistsError
         return {row.code: row.id for row in codes_and_id}
 
     async def get_all_currencies(self) -> Sequence[Currency]:
-        currencies = await self.repository.get_all_currencies()
-        return currencies
+        return await self.repository.get_all_currencies()

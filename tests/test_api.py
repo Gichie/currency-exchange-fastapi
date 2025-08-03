@@ -19,7 +19,7 @@ async def test_currencies(ac: AsyncClient, mock_currency_service: AsyncMock) -> 
 
 @pytest.mark.asyncio
 async def test_get_currencies_database_error(
-        ac: AsyncClient, mock_currency_service_db_error: AsyncMock
+        ac: AsyncClient, mock_currency_service_db_error: AsyncMock,
 ) -> None:
     """Тест: вызов ошибки в БД."""
     response = await ac.get("/currencies")
@@ -39,7 +39,7 @@ async def test_get_currency_by_code(ac: AsyncClient, mock_currency_service: Asyn
 
     assert response.status_code == status.HTTP_200_OK
     assert response.json() == CURRENCIES[0].model_dump()
-    mock_currency_service.get_currency_by_code.assert_awaited_once_with('USD')
+    mock_currency_service.get_currency_by_code.assert_awaited_once_with("USD")
 
 
 @pytest.mark.asyncio

@@ -19,7 +19,7 @@ class ExchangeRateRepository:
         """Получает список всех обменных курсов."""
         query = (select(ExchangeRate).options(
             joinedload(ExchangeRate.base_currency),
-            joinedload(ExchangeRate.target_currency)
+            joinedload(ExchangeRate.target_currency),
         ))
         query_result = await self.session.execute(query)
         return query_result.scalars().all()
@@ -27,7 +27,7 @@ class ExchangeRateRepository:
     async def create_exchange_rate(self, base_id: int, target_id: int, rate: Decimal) -> ExchangeRate:
         """Создает обменный курс для валютной пары."""
         new_exchange_rate = ExchangeRate(
-            base_currency_id=base_id, target_currency_id=target_id, rate=rate
+            base_currency_id=base_id, target_currency_id=target_id, rate=rate,
         )
         self.session.add(new_exchange_rate)
         await self.session.flush()
@@ -37,7 +37,7 @@ class ExchangeRateRepository:
         """Обновляет обменный курс для валютной пары."""
         stmt = (update(ExchangeRate).where(
             ExchangeRate.base_currency_id == base_id,
-            ExchangeRate.target_currency_id == target_id
+            ExchangeRate.target_currency_id == target_id,
         ).values(rate=rate).returning(ExchangeRate))
 
         query_result = await self.session.execute(stmt)
@@ -45,9 +45,9 @@ class ExchangeRateRepository:
         updated_exchange_rate = query_result.scalar_one_or_none()
 
         if not updated_exchange_rate:
-            raise ExchangeRateNotExistsError()
+            raise ExchangeRateNotExistsError
 
-        await self.session.refresh(updated_exchange_rate, ['base_currency', 'target_currency'])
+        await self.session.refresh(updated_exchange_rate, ["base_currency", "target_currency"])
 
         return updated_exchange_rate
 
@@ -62,21 +62,21 @@ class ExchangeRateRepository:
             .where(BaseCurrency.code == base_code, TargetCurrency.code == target_code)
             .options(
                 contains_eager(ExchangeRate.base_currency, alias=BaseCurrency),
-                contains_eager(ExchangeRate.target_currency, alias=TargetCurrency)
+                contains_eager(ExchangeRate.target_currency, alias=TargetCurrency),
             )
         )
         query_result = await self.session.execute(query)
         return query_result.scalar_one_or_none()
 
     async def get_exchange_rates(
-            self, possible_pairs: list[tuple[str, str]]
+            self, possible_pairs: list[tuple[str, str]],
     ) -> Sequence[Row[Any] | RowMapping | Any]:
         BaseCurrency = aliased(Currency)  # noqa: N806
         TargetCurrency = aliased(Currency)  # noqa: N806
 
         conditions = [
             and_(
-                BaseCurrency.code == base, TargetCurrency.code == target
+                BaseCurrency.code == base, TargetCurrency.code == target,
             ) for base, target in possible_pairs
         ]
 
@@ -90,7 +90,7 @@ class ExchangeRateRepository:
             .where(or_(*conditions))
             .options(
                 contains_eager(ExchangeRate.base_currency, alias=BaseCurrency),
-                contains_eager(ExchangeRate.target_currency, alias=TargetCurrency)
+                contains_eager(ExchangeRate.target_currency, alias=TargetCurrency),
             )
         )
 
