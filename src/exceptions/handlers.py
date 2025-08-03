@@ -45,7 +45,8 @@ async def database_exception_handler(request: Request, exc: Exception) -> JSONRe
     )
 
 
-async def currency_not_found_handler(exc: Exception) -> JSONResponse:
+async def currency_not_found_handler(request: Request, exc: Exception) -> JSONResponse:
+    log.warning(f"Валюта не найдена в БД: {exc}")
     return JSONResponse(
         status_code=status.HTTP_404_NOT_FOUND,
         content={"message": "Валюта не найдена"},
@@ -60,7 +61,7 @@ async def currency_exists_handler(request: Request, exc: Exception) -> JSONRespo
     )
 
 
-async def validation_error_handler(exc: Exception) -> JSONResponse:
+async def validation_error_handler(request: Request, exc: Exception) -> JSONResponse:
     """
     Кастомный обработчик ошибок валидации Pydantic.
 
@@ -91,14 +92,16 @@ async def validation_error_handler(exc: Exception) -> JSONResponse:
     )
 
 
-async def exchange_rate_not_found_handler(exc: Exception) -> JSONResponse:
+async def exchange_rate_not_found_handler(request: Request, exc: Exception) -> JSONResponse:
+    log.warning(f"Обменный курс не найден в БД: {exc}")
     return JSONResponse(
         status_code=status.HTTP_404_NOT_FOUND,
         content={"message": "Обменного курса данных валют нет в БД"},
     )
 
 
-async def exchange_rate_exists_handler(exc: Exception) -> JSONResponse:
+async def exchange_rate_exists_handler(request: Request, exc: Exception) -> JSONResponse:
+    log.warning(f"Валютная пара уже существует в БД: {exc}")
     return JSONResponse(
         status_code=status.HTTP_409_CONFLICT,
         content={"message": "Такая валютная пара уже существует"},
@@ -115,7 +118,7 @@ async def same_currency_exception_handler(
     )
 
 
-async def custom_http_exception_handler(exc: Exception) -> JSONResponse:
+async def custom_http_exception_handler(request: Request, exc: Exception) -> JSONResponse:
     if isinstance(exc, StarletteHTTPException):
         if exc.status_code == 404:
             return JSONResponse(

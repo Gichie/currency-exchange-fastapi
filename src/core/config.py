@@ -1,4 +1,4 @@
-import logging
+import logging.config
 from pathlib import Path
 
 import yaml
@@ -30,7 +30,7 @@ LOGGING_CONFIG_PATH = Path(__file__).resolve().parent.parent.parent / "logging_c
 
 def setup_logging() -> None:
     """Загружает конфигурацию логгирования из YAML файла и применяет ее."""
-    with open(LOGGING_CONFIG_PATH) as conf:
+    with LOGGING_CONFIG_PATH.open() as conf:
         logging_config = yaml.safe_load(conf)
 
     logging.config.dictConfig(logging_config)

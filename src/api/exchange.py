@@ -19,7 +19,7 @@ async def exchange_currencies(
         base_currency: Annotated[str, Query(alias="from", pattern="^[a-zA-Z]{3}$")],
         target_currency: Annotated[str, Query(alias="to", pattern="^[a-zA-Z]{3}$")],
         amount: Annotated[Decimal, Query(gt=0, max_digits=18, decimal_places=2)],
-        service: ExchangeRateService = Depends(get_exchange_rate_service),
+        service: Annotated[ExchangeRateService, Depends(get_exchange_rate_service)],
 ) -> Any:
 
     base_currency_upper = base_currency.upper()

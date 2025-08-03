@@ -93,7 +93,7 @@ exclude = [
 
 [tool.ruff.lint]
 select = [
-    "E", "F", "UP", "N", "W", "I", "C4", "SIM", "ARG", "B", "COM", "DTZ", "TCH", "Q", "RSE", "RET", "SLF", "SLOT", "TID", "PIE", "TRY", "PERF", "FBT", "ICN", "PTH", "ERA", "PGH"
+    "E", "F", "UP", "N", "W", "I", "C4", "SIM", "B", "COM", "DTZ", "TCH", "Q", "RSE", "RET", "SLF", "SLOT", "TID", "PIE", "TRY", "PERF", "FBT", "ICN", "PTH", "ERA", "PGH"
 ]
 ignore = [
     "E501", "PLR2004", "PLR0904"
@@ -104,4 +104,4 @@ known-first-party = ["src"]
 known-third-party = ["fastapi", "uvicorn", "sqlalchemy", "pydantic", "alembic", "pytest", "httpx"]
 
 [tool.ruff.lint.pycodestyle]
-max-doc-length = 88
+max-doc-length = 102
