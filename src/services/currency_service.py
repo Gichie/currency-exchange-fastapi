@@ -1,9 +1,9 @@
 import logging
-from typing import Sequence
+from collections.abc import Sequence
 
 from sqlalchemy.exc import IntegrityError
 
-from src.exceptions.exceptions import CurrencyNotExistsError, CurrencyExistsError
+from src.exceptions.exceptions import CurrencyExistsError, CurrencyNotExistsError
 from src.models.currency import Currency
 from src.repositories.currency import CurrencyRepository
 from src.schemas.currency import CurrencyScheme
@@ -23,8 +23,8 @@ class CurrencyService:
         async with self.repository.session.begin():
             try:
                 new_currency = await self.repository.create_currency(code, name, sign)
-            except IntegrityError:
-                raise CurrencyExistsError()
+            except IntegrityError as err:
+                raise CurrencyExistsError() from err
 
             await self.repository.session.refresh(new_currency)
 

@@ -1,6 +1,6 @@
 from decimal import Decimal
 
-from pydantic import BaseModel, Field, model_validator, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from src.schemas.currency import CurrencyScheme
 

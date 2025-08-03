@@ -9,8 +9,13 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 from starlette.requests import Request
 from starlette.responses import JSONResponse
 
-from src.exceptions.exceptions import CurrencyNotExistsError, CurrencyExistsError, \
-    ExchangeRateNotExistsError, ExchangeRateExistsError, SameCurrencyConversionError
+from src.exceptions.exceptions import (
+    CurrencyExistsError,
+    CurrencyNotExistsError,
+    ExchangeRateExistsError,
+    ExchangeRateNotExistsError,
+    SameCurrencyConversionError,
+)
 
 log = logging.getLogger(__name__)
 
@@ -126,7 +131,6 @@ async def custom_http_exception_handler(request: Request, exc: Exception) -> JSO
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
         content={"message": "Произошла внутренняя ошибка сервера."}
     )
-
 
 
 def register_exception_handlers(app: FastAPI) -> None:

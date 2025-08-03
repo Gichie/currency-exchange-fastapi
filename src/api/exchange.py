@@ -5,6 +5,7 @@ from typing import Annotated, Any
 from fastapi import APIRouter, Depends, Query
 
 from src.core.dependencies import get_exchange_rate_service
+from src.exceptions.exceptions import SameCurrencyConversionError
 from src.schemas.exchange_rate import ExchangeCurrencyResponse
 from src.services.exchange_rate_service import ExchangeRateService
 
@@ -20,6 +21,14 @@ async def exchange_currencies(
         amount: Annotated[Decimal, Query(gt=0, max_digits=18, decimal_places=2)],
         service: ExchangeRateService = Depends(get_exchange_rate_service),
 ) -> Any:
-    log.info(f"Запрос на конвертацию валют {base_currency}/{target_currency}. Количество: {amount}.")
-    response = await service.exchange_currencies(base_currency, target_currency, amount)
+
+    base_currency_upper = base_currency.upper()
+    target_currency_upper = target_currency.upper()
+
+    if base_currency == target_currency:
+        raise SameCurrencyConversionError()
+
+    log.info(f"Запрос на конвертацию валют {base_currency_upper}/{target_currency_upper}. "
+             f"Количество: {amount}.")
+    response = await service.exchange_currencies(base_currency_upper, target_currency_upper, amount)
     return response

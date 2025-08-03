@@ -45,9 +45,7 @@ async def test_get_currency_by_code(ac: AsyncClient, mock_currency_service: Asyn
 @pytest.mark.asyncio
 async def test_create_currency_success(ac: AsyncClient, mock_currency_service: AsyncMock) -> None:
     """Тест: успешное создание новой валюты."""
-
     new_currency_data = {"code": "JPY", "name": "Japanese Yen", "sign": "¥"}
-
     created_currency_model = CurrencyScheme(id=99, **new_currency_data)
 
     mock_currency_service.create_currency.return_value = created_currency_model

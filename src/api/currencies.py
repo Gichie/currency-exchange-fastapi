@@ -1,7 +1,7 @@
 import logging
 from typing import Annotated, Any
 
-from fastapi import APIRouter, Form, Depends, Path
+from fastapi import APIRouter, Depends, Form, Path
 from starlette import status
 
 from src.core.dependencies import get_currency_service
@@ -35,7 +35,7 @@ async def create_currency(
         currency: Annotated[CurrencyScheme, Form()],
         service: CurrencyService = Depends(get_currency_service)
 ) -> Any:
-    log.info(f"Запрос на создание валюты. Method: POST. Path: /currencies")
+    log.info("Запрос на создание валюты. Method: POST. Path: /currencies")
     new_currency = await service.create_currency(currency)
 
     return new_currency

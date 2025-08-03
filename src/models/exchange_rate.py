@@ -7,7 +7,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from src.core.db.base import Base
 
 if TYPE_CHECKING:
-    from .currency import Currency
+    from src.models.currency import Currency
 
 
 class ExchangeRate(Base):

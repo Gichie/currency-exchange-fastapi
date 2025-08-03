@@ -1,11 +1,11 @@
 import logging
 from typing import Annotated, Any
 
-from fastapi import APIRouter, Depends, Path, Form
+from fastapi import APIRouter, Depends, Form, Path
 from starlette import status
 
 from src.core.dependencies import get_exchange_rate_service
-from src.schemas.exchange_rate import ExchangeRateSchema, ExchangeRateCreate, ExchangeRateUpdate
+from src.schemas.exchange_rate import ExchangeRateCreate, ExchangeRateSchema, ExchangeRateUpdate
 from src.services.exchange_rate_service import ExchangeRateService
 
 log = logging.getLogger(__name__)
@@ -36,7 +36,7 @@ async def create_exchange_rate(
         exchange_rate: Annotated[ExchangeRateCreate, Form()],
         service: ExchangeRateService = Depends(get_exchange_rate_service)
 ) -> Any:
-    log.info(f"Запрос на создание обменного курса. Method: POST. Path: /exchangeRates")
+    log.info("Запрос на создание обменного курса. Method: POST. Path: /exchangeRates")
     new_exchange_rate = await service.create_exchange_rate(exchange_rate)
 
     return new_exchange_rate

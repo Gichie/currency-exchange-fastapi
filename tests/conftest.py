@@ -1,12 +1,11 @@
-import logging.config
-from collections.abc import Generator
-from typing import AsyncGenerator
+import logging
+from collections.abc import AsyncGenerator, Generator
 from unittest.mock import AsyncMock
 
 import pytest
 import pytest_asyncio
 import yaml
-from httpx import AsyncClient, ASGITransport
+from httpx import ASGITransport, AsyncClient
 from sqlalchemy.exc import OperationalError
 
 from src.core.config import LOGGING_CONFIG_PATH
@@ -29,8 +28,8 @@ def setup_project_logging() -> None:
     """
     config_path = LOGGING_CONFIG_PATH
     if config_path.is_file():
-        with open(config_path) as f:
-            logging_config = yaml.safe_load(f)
+        with open(config_path) as conf_file:
+            logging_config = yaml.safe_load(conf_file)
         logging.config.dictConfig(logging_config)
         print("\nКастомная конфигурация логгирования применена.")
     else:
@@ -43,7 +42,7 @@ def pytest_configure() -> None:
 
 
 @pytest_asyncio.fixture(scope="function")
-async def ac() -> AsyncGenerator[AsyncClient, None]:
+async def ac() -> AsyncGenerator[AsyncClient]:
     """Фикстура, которая создает и предоставляет AsyncClient для тестов."""
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
         yield client

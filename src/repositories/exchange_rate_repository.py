@@ -1,9 +1,10 @@
+from collections.abc import Sequence
 from decimal import Decimal
-from typing import Sequence, Any
+from typing import Any
 
-from sqlalchemy import select, exists, update, and_, or_, Row, RowMapping
+from sqlalchemy import Row, RowMapping, and_, or_, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import joinedload, aliased, contains_eager
+from sqlalchemy.orm import aliased, contains_eager, joinedload
 
 from src.exceptions.exceptions import ExchangeRateNotExistsError
 from src.models.currency import Currency
@@ -20,8 +21,8 @@ class ExchangeRateRepository:
             joinedload(ExchangeRate.base_currency),
             joinedload(ExchangeRate.target_currency)
         ))
-        result = await self.session.execute(query)
-        return result.scalars().all()
+        query_result = await self.session.execute(query)
+        return query_result.scalars().all()
 
     async def create_exchange_rate(self, base_id: int, target_id: int, rate: Decimal) -> ExchangeRate:
         """Создает обменный курс для валютной пары."""
@@ -39,9 +40,9 @@ class ExchangeRateRepository:
             ExchangeRate.target_currency_id == target_id
         ).values(rate=rate).returning(ExchangeRate))
 
-        result = await self.session.execute(stmt)
+        query_result = await self.session.execute(stmt)
 
-        updated_exchange_rate = result.scalar_one_or_none()
+        updated_exchange_rate = query_result.scalar_one_or_none()
 
         if not updated_exchange_rate:
             raise ExchangeRateNotExistsError()
@@ -51,8 +52,8 @@ class ExchangeRateRepository:
         return updated_exchange_rate
 
     async def get_rate_by_codes(self, base_code: str, target_code: str) -> ExchangeRate | None:
-        BaseCurrency = aliased(Currency)
-        TargetCurrency = aliased(Currency)
+        BaseCurrency = aliased(Currency)  # noqa: N806
+        TargetCurrency = aliased(Currency)  # noqa: N806
 
         query = (
             select(ExchangeRate)
@@ -64,14 +65,14 @@ class ExchangeRateRepository:
                 contains_eager(ExchangeRate.target_currency, alias=TargetCurrency)
             )
         )
-        result = await self.session.execute(query)
-        return result.scalar_one_or_none()
+        query_result = await self.session.execute(query)
+        return query_result.scalar_one_or_none()
 
     async def get_exchange_rates(
             self, possible_pairs: list[tuple[str, str]]
     ) -> Sequence[Row[Any] | RowMapping | Any]:
-        BaseCurrency = aliased(Currency)
-        TargetCurrency = aliased(Currency)
+        BaseCurrency = aliased(Currency)  # noqa: N806
+        TargetCurrency = aliased(Currency)  # noqa: N806
 
         conditions = [
             and_(
@@ -93,5 +94,5 @@ class ExchangeRateRepository:
             )
         )
 
-        result = await self.session.execute(query)
-        return result.scalars().all()
+        query_result = await self.session.execute(query)
+        return query_result.scalars().all()

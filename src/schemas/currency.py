@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field, field_validator, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 class CurrencyScheme(BaseModel):
@@ -13,5 +13,5 @@ class CurrencyScheme(BaseModel):
 
     @field_validator("code")
     @classmethod
-    def code_to_uppercase(cls, value: str) -> str:
-        return value.upper()
+    def code_to_uppercase(cls, code: str) -> str:
+        return code.upper()

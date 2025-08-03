@@ -9,17 +9,17 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=find_dotenv())
 
-    POSTGRES_DB: str
-    POSTGRES_PASSWORD: str
-    POSTGRES_USER: str
-    POSTGRES_HOST: str
-    POSTGRES_PORT: int
+    postgres_db: str
+    postgres_password: str
+    postgres_user: str
+    postgres_host: str
+    postgres_port: int
 
     @property
-    def ASYNC_DATABASE_URL(self) -> str:
+    def async_database_url(self) -> str:
         return (
-            f"postgresql+asyncpg://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@{self.POSTGRES_HOST}:"
-            f"{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
+            f"postgresql+asyncpg://{self.postgres_user}:{self.postgres_password}@{self.postgres_host}:"
+            f"{self.postgres_port}/{self.postgres_db}"
         )
 
 
