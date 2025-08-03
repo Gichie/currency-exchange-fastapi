@@ -25,7 +25,7 @@ async def exchange_currencies(
     base_currency_upper = base_currency.upper()
     target_currency_upper = target_currency.upper()
 
-    if base_currency == target_currency:
+    if base_currency_upper == target_currency_upper:
         raise SameCurrencyConversionError
 
     log.info(f"Запрос на конвертацию валют {base_currency_upper}/{target_currency_upper}. "
