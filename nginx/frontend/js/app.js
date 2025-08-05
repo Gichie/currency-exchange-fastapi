@@ -1,4 +1,4 @@
-$(document).ready(function() {
+$(document).ready(function () {
     const host = ""
 
     // Fetch the list of currencies and populate the select element
@@ -10,7 +10,7 @@ $(document).ready(function() {
             success: function (data) {
                 const tbody = $('.currencies-table tbody');
                 tbody.empty();
-                $.each(data, function(index, currency) {
+                $.each(data, function (index, currency) {
                     const row = $('<tr></tr>');
                     row.append($('<td></td>').text(currency.code));
                     row.append($('<td></td>').text(currency.name));
@@ -62,17 +62,17 @@ $(document).ready(function() {
 
     requestCurrencies();
 
-    $("#add-currency").submit(function(e) {
+    $("#add-currency").submit(function (e) {
         e.preventDefault();
 
         $.ajax({
             url: `${host}/currencies`,
             type: "POST",
             data: $("#add-currency").serialize(),
-            success: function(data) {
+            success: function (data) {
                 requestCurrencies();
             },
-            error: function(jqXHR, textStatus, errorThrown) {
+            error: function (jqXHR, textStatus, errorThrown) {
                 const error = JSON.parse(jqXHR.responseText);
                 const toast = $('#api-error-toast');
 
@@ -89,10 +89,10 @@ $(document).ready(function() {
             url: `${host}/exchangeRates`,
             type: "GET",
             dataType: "json",
-            success: function(response) {
+            success: function (response) {
                 const tbody = $('.exchange-rates-table tbody');
                 tbody.empty();
-                $.each(response, function(index, rate) {
+                $.each(response, function (index, rate) {
                     const row = $('<tr></tr>');
                     const currency = rate.baseCurrency.code + rate.targetCurrency.code;
                     const exchangeRate = rate.rate;
@@ -105,7 +105,7 @@ $(document).ready(function() {
                     tbody.append(row);
                 });
             },
-            error: function(jqXHR, textStatus, errorThrown) {
+            error: function (jqXHR, textStatus, errorThrown) {
                 const error = JSON.parse(jqXHR.responseText);
                 const toast = $('#api-error-toast');
 
@@ -117,7 +117,7 @@ $(document).ready(function() {
 
     requestExchangeRates();
 
-    $(document).delegate('.exchange-rate-edit', 'click', function() {
+    $(document).delegate('.exchange-rate-edit', 'click', function () {
         // Get the currency and exchange rate from the row
         const pair = $(this).closest('tr').find('td:first').text();
         const exchangeRate = $(this).closest('tr').find('td:eq(1)').text();
@@ -128,25 +128,24 @@ $(document).ready(function() {
     });
 
     // add event handler for edit exchange rate modal "Save" button
-    $('#edit-exchange-rate-modal .btn-primary').click(function() {
+    $('#edit-exchange-rate-modal .btn-primary').click(function () {
         // get the currency pair and exchange rate from the modal
         const pair = $('#edit-exchange-rate-modal .modal-title').text().replace('Edit ', '').replace(' Exchange Rate', '');
         const exchangeRate = $('#edit-exchange-rate-modal #exchange-rate-input').val();
 
         // set changed values to the table row
         const row = $(`tr:contains(${pair})`);
-        row.find('td:eq(1)').text(exchangeRate);
 
         // send values to the server with a patch request
         $.ajax({
             url: `${host}/exchangeRate/${pair}`,
             type: "PATCH",
-            contentType : "application/x-www-form-urlencoded",
+            contentType: "application/x-www-form-urlencoded",
             data: `rate=${exchangeRate}`,
-            success: function() {
-
+            success: function () {
+                row.find('td:eq(1)').text(exchangeRate);
             },
-            error: function(jqXHR, textStatus, errorThrown) {
+            error: function (jqXHR, textStatus, errorThrown) {
                 const error = JSON.parse(jqXHR.responseText);
                 const toast = $('#api-error-toast');
 
@@ -159,17 +158,17 @@ $(document).ready(function() {
         $('#edit-exchange-rate-modal').modal('hide');
     });
 
-    $("#add-exchange-rate").submit(function(e) {
+    $("#add-exchange-rate").submit(function (e) {
         e.preventDefault();
 
         $.ajax({
             url: `${host}/exchangeRates`,
             type: "POST",
             data: $("#add-exchange-rate").serialize(),
-            success: function(data) {
+            success: function (data) {
                 requestExchangeRates();
             },
-            error: function(jqXHR, textStatus, errorThrown) {
+            error: function (jqXHR, textStatus, errorThrown) {
                 const error = JSON.parse(jqXHR.responseText);
                 const toast = $('#api-error-toast');
 
@@ -181,7 +180,7 @@ $(document).ready(function() {
         return false;
     });
 
-    $("#convert").submit(function(e) {
+    $("#convert").submit(function (e) {
         e.preventDefault();
 
         const baseCurrency = $("#convert-base-currency").val();
@@ -192,10 +191,10 @@ $(document).ready(function() {
             url: `${host}/exchange?from=${baseCurrency}&to=${targetCurrency}&amount=${amount}`,
             type: "GET",
             // data: "$("#add-exchange-rate").serialize()",
-            success: function(data) {
+            success: function (data) {
                 $("#convert-converted-amount").val(data.convertedAmount);
             },
-            error: function(jqXHR, textStatus, errorThrown) {
+            error: function (jqXHR, textStatus, errorThrown) {
                 const error = JSON.parse(jqXHR.responseText);
                 const toast = $('#api-error-toast');
 
